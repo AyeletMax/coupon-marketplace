@@ -27,7 +27,7 @@ async function purchaseCoupon(req, res) {
         .json({ error_code: 'PRODUCT_ALREADY_SOLD', message: 'Product already sold' });
     }
 
-    // הצלחה – מחזירים את ערך הקופון והמחיר הסופי (minimum_sell_price)
+    // Success – return coupon value and final price (minimum_sell_price)
     res.json(result);
   } catch (error) {
     res.status(500).json({ error_code: 'SERVER_ERROR', message: error.message });

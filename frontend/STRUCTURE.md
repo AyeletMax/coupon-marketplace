@@ -4,14 +4,14 @@
 
 ```
 frontend/src/
-├── components/         # כל הקומפוננטות (גדולות וקטנות)
-│   ├── AdminView.jsx       → קומפוננטה ראשית - מסך אדמין
-│   ├── CustomerView.jsx    → קומפוננטה ראשית - מסך לקוח
-│   ├── CouponCard.jsx      → קומפוננטה - כרטיס קופון
-│   ├── CouponGrid.jsx      → קומפוננטה - רשת קופונים
-│   ├── ModeHeader.jsx      → קומפוננטה - כותרת עם בחירת מצב
-│   └── PurchaseResult.jsx  → קומפוננטה - הודעת הצלחה
-├── styles/            # קבצי CSS (קובץ לכל קומפוננטה)
+├── components/         # All React components
+│   ├── AdminView.jsx       → Main admin screen
+│   ├── CustomerView.jsx    → Main customer screen
+│   ├── CouponCard.jsx      → Single coupon card
+│   ├── CouponGrid.jsx      → Grid of coupons
+│   ├── ModeHeader.jsx      → Header with mode toggle
+│   └── PurchaseResult.jsx  → Purchase success message
+├── styles/            # CSS files (one per component)
 │   ├── AdminView.css
 │   ├── CustomerView.css
 │   ├── CouponCard.css
@@ -19,28 +19,29 @@ frontend/src/
 │   ├── ModeHeader.css
 │   ├── PurchaseResult.css
 │   └── App.css
-├── api/               # קריאות API
-│   └── customerApi.js
-├── App.jsx            # קומפוננטת שורש
-├── main.jsx           # נקודת כניסה
-└── index.css          # סטיילים גלובליים
+├── api/               # API calls
+│   ├── customerApi.js
+│   └── adminApi.js
+├── App.jsx            # Root component
+├── main.jsx           # Entry point
+└── index.css          # Global styles
 ```
 
 ## 🎯 Component Hierarchy
 
 ```
-App.jsx (קומפוננטת שורש)
-  ├── ModeHeader (בחירת מצב)
-  └── CustomerView / AdminView (קומפוננטות ראשיות)
+App.jsx (root component)
+  ├── ModeHeader (mode toggle)
+  └── CustomerView / AdminView (main views)
        └── CouponGrid
             └── CouponCard (x N)
 ```
 
 ## 📝 Naming Conventions
 
-### קומפוננטות
-- **PascalCase** לשמות קבצים: `CouponCard.jsx`
-- **PascalCase** לשמות פונקציות: `function CouponCard() {}`
+### Components
+- **PascalCase** for file names: `CouponCard.jsx`
+- **PascalCase** for component functions: `function CouponCard() {}`
 
 ### CSS Classes
 - **BEM methodology** (Block Element Modifier):
@@ -48,23 +49,23 @@ App.jsx (קומפוננטת שורש)
   - Element: `.coupon-card__title`
   - Modifier: `.mode-button--active`
 
-### קבצי CSS
-- שם זהה לקומפוננטה: `CouponCard.jsx` → `CouponCard.css`
-- import בתחילת הקומפוננטה: `import '../styles/CouponCard.css'`
+### CSS Files
+- Same name as component: `CouponCard.jsx` → `CouponCard.css`
+- Import at the top of the component: `import '../styles/CouponCard.css'`
 
 ## ✨ Guidelines
 
-1. **הפרדת אחריות:**
-   - קומפוננטות ראשיות (CustomerView, AdminView) - עם state ולוגיקה
-   - קומפוננטות עזר (CouponCard, CouponGrid) - פשוטות ולשימוש חוזר
-   - כל העיצוב בקבצי CSS נפרדים
+1. **Separation of concerns:**
+   - Main views (CustomerView, AdminView) – with state and logic
+   - Reusable components (CouponCard, CouponGrid) – presentational only
+   - All styling lives in dedicated CSS files
 
-2. **סטיילים:**
-   - ✅ קובץ CSS נפרד לכל קומפוננטה
+2. **Styling:**
+   - ✅ One CSS file per component
    - ✅ BEM naming convention
-   - ❌ אין inline styles (אלא אם כן דינמי, כמו `backgroundImage`)
+   - ❌ No unnecessary inline styles (only when dynamic, like `backgroundImage`)
 
-3. **קוד נקי:**
-   - כל קומפוננטה בקובץ נפרד
-   - props ברורים ומתועדים
-   - קוד קריא ומסודר
+3. **Clean code:**
+   - One component per file
+   - Clear, explicit props
+   - Readable and well-structured code

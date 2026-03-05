@@ -39,6 +39,15 @@ export function CustomerView() {
     }
   }
 
+  useEffect(() => {
+    if (purchaseResult) {
+      const el = document.querySelector('.purchase-result-modal');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [purchaseResult]);
+
   return (
     <div className="customer-view">
       <header className="customer-view__header">
@@ -59,7 +68,12 @@ export function CustomerView() {
         <CouponGrid coupons={coupons} onPurchase={handlePurchase} />
       )}
 
-      <PurchaseResult result={purchaseResult} />
+      {purchaseResult && (
+        <PurchaseResult 
+          result={purchaseResult} 
+          onClose={() => setPurchaseResult(null)} 
+        />
+      )}
     </div>
   );
 }

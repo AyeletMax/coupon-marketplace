@@ -1,5 +1,5 @@
 /**
- * חיבור ל־MySQL – משתמש ב־.env בשורש הפרויקט
+ * MySQL connection – uses .env in the project root
  */
 
 const mysql = require('mysql2/promise');
@@ -24,7 +24,7 @@ async function getPool() {
   return pool;
 }
 
-/** בודק שהחיבור עובד (למשל ל־/health) */
+/** Check DB connectivity (used for /health) */
 async function checkConnection() {
   const p = await getPool();
   const [rows] = await p.query('SELECT 1 AS ok');

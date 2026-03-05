@@ -104,6 +104,8 @@ export function AdminView() {
     return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const isFormOpen = showForm || !!editingCoupon;
+
   return (
     <div className="admin-view">
       <header className="admin-view__header">
@@ -129,21 +131,6 @@ export function AdminView() {
 
       {error && <p className="admin-view__error">{error}</p>}
 
-      {showForm && (
-        <CouponForm
-          onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
-
-      {editingCoupon && (
-        <CouponForm
-          initialData={editingCoupon}
-          onSubmit={handleUpdate}
-          onCancel={() => setEditingCoupon(null)}
-        />
-      )}
-
       {loading && <p className="admin-view__loading">Loading...</p>}
 
       {!loading && coupons.length === 0 && (
@@ -160,6 +147,21 @@ export function AdminView() {
               onDelete={handleDelete}
             />
           ))}
+        </div>
+      )}
+
+      {isFormOpen && (
+        <div className="admin-view__modal-backdrop">
+          <div className="admin-view__modal">
+            <CouponForm
+              initialData={editingCoupon || undefined}
+              onSubmit={editingCoupon ? handleUpdate : handleCreate}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingCoupon(null);
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

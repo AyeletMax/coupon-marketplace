@@ -3,18 +3,18 @@ const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
-// Hash של סיסמת המנהל – נטען ממשתנה סביבה לצורך גמישות ואבטחה
+// Admin password hash – loaded from environment variable for flexibility and security
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 
-// אחסון טוקנים פעילים (בפרודקשן - השתמש ב-Redis או מסד נתונים)
+// In-memory active admin tokens (for production use Redis or a database)
 const activeTokens = new Map(); // Map<token, { createdAt, expiresAt }>
 
-// יצירת טוקן אקראי
+// Generate a random token
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// ניקוי טוקנים שפגו
+// Remove expired tokens
 function cleanExpiredTokens() {
   const now = Date.now();
   for (const [token, data] of activeTokens.entries()) {
@@ -24,13 +24,13 @@ function cleanExpiredTokens() {
   }
 }
 
-// בדיקה אם טוקן תקף
+// Check if token is still valid
 function isValidToken(token) {
   cleanExpiredTokens();
   return activeTokens.has(token);
 }
 
-// התחברות מנהל
+// Admin login
 async function adminLogin(req, res) {
   try {
     const { password } = req.body;
@@ -49,7 +49,7 @@ async function adminLogin(req, res) {
       });
     }
     
-    // השוואת הסיסמא עם ה-hash
+    // Compare password with hash
     const isValidPassword = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
     
     if (!isValidPassword) {
@@ -59,14 +59,14 @@ async function adminLogin(req, res) {
       });
     }
     
-    // מבטלים טוקנים ישנים – רק סשן אדמין אחד פעיל בכל רגע
+    // Revoke all previous tokens – only one active admin session at a time
     cleanExpiredTokens();
     activeTokens.clear();
     
-    // יצירת טוקן חדש
+    // Generate a new token
     const token = generateToken();
     const now = Date.now();
-    const expiresIn = 24 * 60 * 60 * 1000; // 24 שעות
+    const expiresIn = 24 * 60 * 60 * 1000; // 24 hours
     
     activeTokens.set(token, {
       createdAt: now,
@@ -75,7 +75,7 @@ async function adminLogin(req, res) {
     
     res.json({ 
       token,
-      expires_in: 86400 // 24 שעות בשניות
+      expires_in: 86400 // 24 hours in seconds
     });
   } catch (error) {
     console.error('Admin login error:', error);
@@ -86,7 +86,7 @@ async function adminLogin(req, res) {
   }
 }
 
-// התנתקות מנהל
+// Admin logout
 function adminLogout(req, res) {
   try {
     const authHeader = req.headers.authorization;

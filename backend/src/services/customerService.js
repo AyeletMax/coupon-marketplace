@@ -1,13 +1,13 @@
 /**
- * Customer service – קנייה ישירה של קופונים ע\"י לקוח (לא ריסיילר).
- * המחיר ללקוח תמיד minimum_sell_price, בלי reseller_price מהלקוח.
+ * Customer service – direct coupon purchases by end-customers (not resellers).
+ * The customer always pays minimum_sell_price, never sends a custom price.
  */
 
 const { getPool } = require('../db');
 
 /**
- * מחזיר את כל הקופונים שעדיין לא נמכרו ללקוח,
- * עם price = minimum_sell_price (להצגה ב-frontend).
+ * Returns all coupons that are not sold yet,
+ * with price = minimum_sell_price (for frontend display).
  */
 async function getAvailableCouponsForCustomer() {
   const pool = await getPool();
@@ -25,12 +25,12 @@ async function getAvailableCouponsForCustomer() {
 }
 
 /**
- * רכישה ישירה של קופון ע\"י לקוח:
- * - בודק שהמוצר קיים ולא נמכר
- * - גובה מחיר = minimum_sell_price (לא מהלקוח)
- * - מסמן כנמכר
- * - מחזיר את value (קוד הקופון)
- * הכל בטרנזקציה כדי למנוע מירוץ.
+ * Direct coupon purchase by customer:
+ * - Validates that product exists and is not sold
+ * - Uses price = minimum_sell_price (not provided by the customer)
+ * - Marks coupon as sold
+ * - Returns the value (coupon code)
+ * All inside a transaction to avoid race conditions.
  */
 async function purchaseCouponAsCustomer(productId) {
   const pool = await getPool();
