@@ -1,0 +1,26 @@
+# שלב 2b – MySQL בלבד (האפליקציה תתווסף ב־Docker בשלב 8)
+# מריצים: docker compose up -d
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: coupon-marketplace-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-coupon_marketplace}
+      MYSQL_USER: ${MYSQL_USER:-app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
+    # פורט 3307 במחשב (כי 3306 לרוב תפוס על ידי MySQL מקומי)
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
