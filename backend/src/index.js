@@ -14,6 +14,7 @@ const express = require('express');
 const { checkConnection } = require('./db');
 const adminRoutes = require('./routes/adminRoutes');
 const resellerRoutes = require('./routes/resellerRoutes');
+const customerRoutes = require('./routes/customerRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use('/api/admin', adminRoutes);
 app.use('/api/v1', resellerRoutes);
+app.use('/api/customer', customerRoutes);
 
 app.get('/health', async (req, res) => {
   try {
