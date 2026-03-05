@@ -12,11 +12,15 @@ require('dotenv').config({ path: envPath });
 
 const express = require('express');
 const { checkConnection } = require('./db');
+const adminRoutes = require('./routes/adminRoutes');
+const resellerRoutes = require('./routes/resellerRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use('/api/admin', adminRoutes);
+app.use('/api/v1', resellerRoutes);
 
 app.get('/health', async (req, res) => {
   try {
