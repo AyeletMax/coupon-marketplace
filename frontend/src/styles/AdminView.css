@@ -9,6 +9,19 @@
   margin-bottom: 2rem;
 }
 
+.admin-view__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.admin-view__button--secondary {
+  background: #6b7280;
+}
+
+.admin-view__button--secondary:hover {
+  background: #4b5563;
+}
+
 .admin-view__title {
   margin: 0;
   color: #111827;

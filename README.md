@@ -138,6 +138,23 @@ Frontend runs on http://localhost:5173
 
 Base URL: `/api/admin`
 
+#### Admin Login
+
+```http
+POST /api/admin/login
+Content-Type: application/json
+
+{
+  "password": "admin123" // default for local/dev, can be changed via ADMIN_PASSWORD_HASH
+}
+```
+
+Security notes:
+- Password is never stored in plain text, only as a bcrypt hash (`ADMIN_PASSWORD_HASH`).
+- A random Bearer token is issued on successful login and must be sent in `Authorization: Bearer <token>` for all admin endpoints.
+- Only one admin session is active at a time (new login revokes previous tokens).
+- Login endpoint is protected with a dedicated rate limiter to mitigate brute-force attacks.
+
 #### Create Coupon
 ```http
 POST /api/admin/coupons
@@ -328,6 +345,11 @@ MYSQL_DATABASE=coupon_marketplace
 MYSQL_USER=app
 MYSQL_PASSWORD=apppassword
 MYSQL_PORT=3307
+
+# Admin authentication
+# Hash for default admin password "admin123" (bcrypt, 12 rounds).
+# In production you should generate a new hash for a stronger password.
+ADMIN_PASSWORD_HASH=$2b$12$p61JVdKaQq004/GgY9kFrOwGVYwDV5w1nP4bB.fk8Rcm/vSJsg6Zu
 
 # Reseller API Token
 RESELLER_TOKEN=secret-reseller-token

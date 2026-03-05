@@ -37,6 +37,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-coupon_marketplace}
       MYSQL_USER: ${MYSQL_USER:-app}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-$2b$12$p61JVdKaQq004/GgY9kFrOwGVYwDV5w1nP4bB.fk8Rcm/vSJsg6Zu}
       RESELLER_TOKEN: ${RESELLER_TOKEN:-secret-reseller-token}
       PORT: 3000
     ports:

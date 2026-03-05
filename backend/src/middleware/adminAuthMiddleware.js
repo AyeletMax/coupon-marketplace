@@ -1,4 +1,6 @@
-function authMiddleware(req, res, next) {
+const { isValidToken } = require('../controllers/adminController');
+
+function adminAuthMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -9,23 +11,15 @@ function authMiddleware(req, res, next) {
   }
   
   const token = authHeader.substring(7);
-  const validToken = process.env.RESELLER_TOKEN;
   
-  if (!validToken) {
-    return res.status(500).json({ 
-      error_code: 'SERVER_ERROR', 
-      message: 'Reseller authentication not configured' 
-    });
-  }
-  
-  if (token !== validToken) {
+  if (!isValidToken(token)) {
     return res.status(401).json({ 
       error_code: 'UNAUTHORIZED', 
-      message: 'Invalid token' 
+      message: 'Invalid or expired token' 
     });
   }
   
   next();
 }
 
-module.exports = authMiddleware;
+module.exports = adminAuthMiddleware;

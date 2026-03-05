@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
-import { fetchAdminCoupons, createCoupon, updateCoupon, deleteCoupon } from '../api/adminApi';
+import { fetchAdminCoupons, createCoupon, updateCoupon, deleteCoupon, isAuthenticated, logout } from '../api/adminApi';
 import { CouponForm } from './CouponForm';
 import { AdminCouponRow } from './AdminCouponRow';
+import { AdminLogin } from './AdminLogin';
 import '../styles/AdminView.css';
 
 export function AdminView() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
+
+  useEffect(() => {
+    setIsLoggedIn(isAuthenticated());
+  }, []);
 
   async function loadCoupons() {
     try {
@@ -19,14 +25,19 @@ export function AdminView() {
       setCoupons(data);
     } catch (err) {
       setError(err.message);
+      if (err.message.includes('Session expired')) {
+        setIsLoggedIn(false);
+      }
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadCoupons();
-  }, []);
+    if (isLoggedIn) {
+      loadCoupons();
+    }
+  }, [isLoggedIn]);
 
   async function handleCreate(formData) {
     try {
@@ -36,6 +47,9 @@ export function AdminView() {
       await loadCoupons();
     } catch (err) {
       setError(err.message);
+      if (err.message.includes('Session expired')) {
+        setIsLoggedIn(false);
+      }
     }
   }
 
@@ -47,6 +61,9 @@ export function AdminView() {
       await loadCoupons();
     } catch (err) {
       setError(err.message);
+      if (err.message.includes('Session expired')) {
+        setIsLoggedIn(false);
+      }
     }
   }
 
@@ -58,6 +75,9 @@ export function AdminView() {
       await loadCoupons();
     } catch (err) {
       setError(err.message);
+      if (err.message.includes('Session expired')) {
+        setIsLoggedIn(false);
+      }
     }
   }
 
@@ -66,19 +86,45 @@ export function AdminView() {
     setShowForm(false);
   }
 
+  function handleLoginSuccess() {
+    setIsLoggedIn(true);
+    setError('');
+  }
+
+  async function handleLogout() {
+    await logout();
+    setIsLoggedIn(false);
+    setCoupons([]);
+    setShowForm(false);
+    setEditingCoupon(null);
+    setError('');
+  }
+
+  if (!isLoggedIn) {
+    return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="admin-view">
       <header className="admin-view__header">
         <h2 className="admin-view__title">Admin Mode</h2>
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setEditingCoupon(null);
-          }}
-          className="admin-view__button"
-        >
-          {showForm ? 'Cancel' : '+ New Coupon'}
-        </button>
+        <div className="admin-view__actions">
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              setEditingCoupon(null);
+            }}
+            className="admin-view__button"
+          >
+            {showForm ? 'Cancel' : '+ New Coupon'}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="admin-view__button admin-view__button--secondary"
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
       {error && <p className="admin-view__error">{error}</p>}
