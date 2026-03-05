@@ -1,0 +1,86 @@
+.admin-coupon-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.75rem;
+}
+
+.admin-coupon-row__image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.admin-coupon-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-coupon-row__name {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.admin-coupon-row__description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-coupon-row__price {
+  font-size: 0.875rem;
+  color: #374151;
+  min-width: 100px;
+}
+
+.admin-coupon-row__label {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.admin-coupon-row__status {
+  font-size: 0.875rem;
+  min-width: 100px;
+}
+
+.admin-coupon-row__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-coupon-row__button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-coupon-row__button--edit {
+  background: #3b82f6;
+  color: white;
+}
+
+.admin-coupon-row__button--edit:hover {
+  background: #2563eb;
+}
+
+.admin-coupon-row__button--delete {
+  background: #ef4444;
+  color: white;
+}
+
+.admin-coupon-row__button--delete:hover {
+  background: #dc2626;
+}

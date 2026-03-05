@@ -1,0 +1,59 @@
+.admin-view {
+  max-width: 100%;
+}
+
+.admin-view__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.admin-view__title {
+  margin: 0;
+  color: #111827;
+  font-size: 1.75rem;
+}
+
+.admin-view__button {
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-view__button:hover {
+  background: #2563eb;
+}
+
+.admin-view__error {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-view__loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}
+
+.admin-view__empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 3rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-view__list {
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,65 @@
+.coupon-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.coupon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.coupon-card__image {
+  width: 100%;
+  padding-top: 56%;
+  border-radius: 0.5rem;
+  background-size: cover;
+  background-position: center;
+  background-color: #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+.coupon-card__title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.coupon-card__description {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.coupon-card__price {
+  margin: 0.5rem 0;
+  font-weight: 600;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.coupon-card__button {
+  margin-top: auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #10b981;
+  color: white;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.coupon-card__button:hover {
+  background: #059669;
+}
+
+.coupon-card__button:active {
+  transform: scale(0.98);
+}

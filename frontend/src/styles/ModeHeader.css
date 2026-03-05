@@ -1,0 +1,44 @@
+.mode-header {
+  padding: 1rem 2rem;
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mode-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.mode-header__buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mode-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.mode-button:hover {
+  opacity: 0.9;
+}
+
+.mode-button--customer {
+  background: #10b981;
+}
+
+.mode-button--admin {
+  background: #3b82f6;
+}
+
+.mode-button--inactive {
+  background: #374151;
+}

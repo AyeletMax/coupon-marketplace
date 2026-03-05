@@ -1,0 +1,12 @@
+.coupon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .coupon-grid {
+    grid-template-columns: 1fr;
+  }
+}

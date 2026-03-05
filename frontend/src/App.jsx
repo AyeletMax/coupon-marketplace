@@ -1,13 +1,18 @@
-/**
- * Coupon Marketplace - Minimal frontend
- * Step 1: placeholder - Admin/Customer views in later steps
- */
+import { useState } from 'react';
+import { ModeHeader } from './components/ModeHeader';
+import { CustomerView } from './components/CustomerView';
+import { AdminView } from './components/AdminView';
+import './styles/App.css';
 
 function App() {
+  const [mode, setMode] = useState('customer');
+
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Coupon Marketplace</h1>
-      <p>Step 1 – Frontend ready for Step 7.</p>
+    <div className="app">
+      <ModeHeader mode={mode} onModeChange={setMode} />
+      <main className="app__main">
+        {mode === 'customer' ? <CustomerView /> : <AdminView />}
+      </main>
     </div>
   );
 }

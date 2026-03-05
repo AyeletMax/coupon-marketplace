@@ -1,36 +1,38 @@
-# מסד הנתונים – הסבר קצר
+# Database Files
 
-## למה שתי טבלאות?
+## 📁 קבצים:
 
-- **products** – מידע ששייך לכל מוצר (שם, תיאור, תמונה, סוג). בעתיד יכול להיות גם מוצר מסוג אחר (לא קופון).
-- **coupons** – מידע ששייך רק לקופון: מחיר עלות, מרווח, האם נמכר, והערך (בarcode/QR). כל שורה ב־coupons מקושרת ל־שורה אחת ב־products דרך `product_id`.
+### `schema.sql`
+**יוצר את מבנה הטבלאות** - להריץ פעם אחת בהתחלה.
 
-## שדות חשובים
+- טבלת `products` - מוצרים כלליים
+- טבלת `coupons` - פרטי קופונים
 
-| טבלה   | שדה                | משמעות |
-|--------|--------------------|--------|
-| products | id, name, type   | מזהה, שם, סוג (כרגע רק COUPON) |
-| products | image_url        | חובה – קישור לתמונה |
-| coupons  | cost_price       | מחיר עלות – רק אדמין קובע |
-| coupons  | margin_percentage| אחוז מרווח – רק אדמין קובע |
-| coupons  | minimum_sell_price | מחיר מינימלי למכירה – **מחושב בשרת** (לא נשמר מהלקוח) |
-| coupons  | is_sold          | האם הקופון כבר נמכר |
-| coupons  | value_type, value| הערך של הקופון – **מוחזר רק אחרי רכישה** |
+### `sample-data.sql`
+**מוסיף נתוני דוגמה** - 5 קופונים לבדיקה:
+- 🍕 Pizza Hut - ₪60
+- 💆 Spa Treatment - ₪230
+- 🎬 Cinema City - ₪100
+- 🍽️ Fine Dining - ₪390
+- 💪 Gym Membership - ₪480
 
-## איך מריצים את הסכמה? (שלב 2b)
+## 🚀 הרצה:
 
-1. וודאי ש־Docker Desktop רץ.
-2. מהשורש של הפרויקט: `docker compose up -d`
-3. חכי כמה שניות עד ש־MySQL מוכן.
-4. מהשורש של הפרויקט, הרצת הסכמה (פעם אחת):
+### 1. יצירת מבנה (פעם אחת):
+```powershell
+Get-Content .\backend\database\schema.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
+```
 
-   **PowerShell (Windows):**
-   ```powershell
-   Get-Content .\backend\database\schema.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
-   ```
+### 2. הוספת נתונים (אופציונלי):
+```powershell
+Get-Content .\backend\database\sample-data.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
+```
 
-   **Bash:**
-   ```bash
-   docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace < backend/database/schema.sql
-   ```
-   אחרי זה הטבלאות קיימות.
+### 3. איפוס מלא (מחיקה + יצירה מחדש):
+```powershell
+Get-Content .\backend\database\schema.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
+Get-Content .\backend\database\sample-data.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
+```
+
+## 💡 טיפ:
+אם רוצה לאפס הכל ולהתחיל מחדש, פשוט הריצי את שני הקבצים לפי הסדר.
