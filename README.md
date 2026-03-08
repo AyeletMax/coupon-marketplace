@@ -185,10 +185,6 @@ coupon-marketplace/
 **Database error:** `docker logs coupon-marketplace-db`  
 **Clean restart:** `docker compose down -v && docker compose up -d --build`
 
-## License
-
-MIT
-
 ## Author
 
 Ayelet Maximove
