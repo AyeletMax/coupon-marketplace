@@ -76,7 +76,12 @@ This will start:
 
 Open your browser: **http://localhost**
 
-The database will be automatically initialized with sample data (5 coupons).
+The database will be automatically initialized with:
+- **5 sample coupons** (see Sample Data section below)
+- **Default admin user:**
+  - Username: `admin`
+  - Password: `admin123`
+- **No resellers** (you need to create them via Admin panel after login)
 
 ### 5. Stop services
 ```bash
@@ -134,6 +139,19 @@ Frontend runs on http://localhost:5173
 
 ## 📡 API Documentation
 
+### 🔐 Default Credentials (Development)
+
+**Admin Login:**
+- Username: `admin`
+- Password: `admin123`
+
+**Reseller API:**
+- No default reseller tokens are created automatically
+- Admin must create resellers via the Admin panel after logging in
+- Each reseller gets a unique Bearer token upon creation
+
+---
+
 ### Admin API
 
 Base URL: `/api/admin`
@@ -145,15 +163,24 @@ POST /api/admin/login
 Content-Type: application/json
 
 {
-  "password": "admin123" // default for local/dev, can be changed via ADMIN_PASSWORD_HASH
+  "password": "admin123"
+}
+```
+
+Response:
+```json
+{
+  "token": "a1b2c3d4e5f6...",
+  "expires_in": 86400
 }
 ```
 
 Security notes:
-- Password is never stored in plain text, only as a bcrypt hash (`ADMIN_PASSWORD_HASH`).
-- A random Bearer token is issued on successful login and must be sent in `Authorization: Bearer <token>` for all admin endpoints.
-- Only one admin session is active at a time (new login revokes previous tokens).
-- Login endpoint is protected with a dedicated rate limiter to mitigate brute-force attacks.
+- Password is stored as bcrypt hash in the `admins` table
+- A random Bearer token is issued on successful login
+- Token must be sent in `Authorization: Bearer <token>` for all admin endpoints
+- Only one admin session is active at a time (new login revokes previous tokens)
+- Login endpoint is protected with rate limiting (10 attempts per 15 minutes)
 
 #### Create Coupon
 ```http
@@ -240,26 +267,28 @@ Base URL: `/api/v1`
 
 **Authentication Required:** Bearer Token
 
+**Note:** Reseller tokens are created by Admin via the Admin panel. There are no default reseller tokens.
+
 ```http
-Authorization: Bearer secret-reseller-token
+Authorization: Bearer <your-reseller-token>
 ```
 
 #### Get Available Products
 ```http
 GET /api/v1/products
-Authorization: Bearer secret-reseller-token
+Authorization: Bearer <your-reseller-token>
 ```
 
 #### Get Product by ID
 ```http
 GET /api/v1/products/{id}
-Authorization: Bearer secret-reseller-token
+Authorization: Bearer <your-reseller-token>
 ```
 
 #### Purchase Product
 ```http
 POST /api/v1/products/{id}/purchase
-Authorization: Bearer secret-reseller-token
+Authorization: Bearer <your-reseller-token>
 Content-Type: application/json
 
 {
@@ -346,36 +375,44 @@ MYSQL_USER=app
 MYSQL_PASSWORD=apppassword
 MYSQL_PORT=3307
 
-# Admin authentication
-# Hash for default admin password "admin123" (bcrypt, 12 rounds).
-# In production you should generate a new hash for a stronger password.
-ADMIN_PASSWORD_HASH=$2b$12$p61JVdKaQq004/GgY9kFrOwGVYwDV5w1nP4bB.fk8Rcm/vSJsg6Zu
-
-# Reseller API Token
-RESELLER_TOKEN=secret-reseller-token
-
 # Backend Port
 PORT=3000
 ```
 
 **⚠️ Never commit `.env` to Git!**
 
+**Note:** Admin and Reseller credentials are stored in the database, not in environment variables.
+
 ---
 
 ## 🧪 Testing the API
 
-### Using cURL
+### Admin Login
 
-**Get available products (Reseller):**
+**Login as admin:**
 ```bash
-curl -H "Authorization: Bearer secret-reseller-token" \
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"password": "admin123"}' \
+     http://localhost:3000/api/admin/login
+```
+
+Response will include a token. Use it for subsequent admin requests.
+
+### Reseller API
+
+**Note:** First create a reseller via Admin panel to get a token.
+
+**Get available products:**
+```bash
+curl -H "Authorization: Bearer <your-reseller-token>" \
      http://localhost:3000/api/v1/products
 ```
 
 **Purchase as Reseller:**
 ```bash
 curl -X POST \
-     -H "Authorization: Bearer secret-reseller-token" \
+     -H "Authorization: Bearer <your-reseller-token>" \
      -H "Content-Type: application/json" \
      -d '{"reseller_price": 120.00}' \
      http://localhost:3000/api/v1/products/{product-id}/purchase

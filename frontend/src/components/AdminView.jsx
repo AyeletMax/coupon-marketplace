@@ -14,8 +14,9 @@ export function AdminView() {
   const [editingCoupon, setEditingCoupon] = useState(null);
 
   useEffect(() => {
-    // Don't auto-set logged in state on mount
-    // Let the user click login instead
+    if (isAuthenticated()) {
+      setIsLoggedIn(true);
+    }
   }, []);
 
   useEffect(() => {

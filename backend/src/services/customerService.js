@@ -24,14 +24,9 @@ async function purchaseCouponAsCustomer(productId) {
     await connection.beginTransaction();
 
     const [rows] = await connection.query(
-      `SELECT p.id,
-              c.minimum_sell_price,
-              c.is_sold,
-              c.value_type,
-              c.value
-       FROM products p
-       JOIN coupons c ON p.id = c.product_id
-       WHERE p.id = ?
+      `SELECT c.minimum_sell_price, c.is_sold, c.value_type, c.value
+       FROM coupons c
+       WHERE c.product_id = ?
        FOR UPDATE`,
       [productId]
     );
@@ -41,14 +36,12 @@ async function purchaseCouponAsCustomer(productId) {
       return { error: 'PRODUCT_NOT_FOUND' };
     }
 
-    const product = rows[0];
+    const coupon = rows[0];
 
-    if (product.is_sold) {
+    if (coupon.is_sold) {
       await connection.rollback();
       return { error: 'PRODUCT_ALREADY_SOLD' };
     }
-
-    const finalPrice = product.minimum_sell_price;
 
     await connection.query(
       'UPDATE coupons SET is_sold = TRUE WHERE product_id = ?',
@@ -59,9 +52,9 @@ async function purchaseCouponAsCustomer(productId) {
 
     return {
       product_id: productId,
-      final_price: finalPrice,
-      value_type: product.value_type,
-      value: product.value,
+      final_price: coupon.minimum_sell_price,
+      value_type: coupon.value_type,
+      value: coupon.value,
     };
   } catch (error) {
     await connection.rollback();
@@ -75,4 +68,3 @@ module.exports = {
   getAvailableCouponsForCustomer,
   purchaseCouponAsCustomer,
 };
-
