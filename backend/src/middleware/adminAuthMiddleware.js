@@ -1,4 +1,4 @@
-const { isValidToken } = require('../controllers/adminController');
+const { isValidToken } = require('../services/adminAuthService');
 
 function adminAuthMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;

@@ -14,8 +14,15 @@ export function AdminView() {
   const [editingCoupon, setEditingCoupon] = useState(null);
 
   useEffect(() => {
-    setIsLoggedIn(isAuthenticated());
+    // Don't auto-set logged in state on mount
+    // Let the user click login instead
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      loadCoupons();
+    }
+  }, [isLoggedIn]);
 
   async function loadCoupons() {
     try {
@@ -24,20 +31,17 @@ export function AdminView() {
       const data = await fetchAdminCoupons();
       setCoupons(data);
     } catch (err) {
-      setError(err.message);
       if (err.message.includes('Session expired')) {
         setIsLoggedIn(false);
+      } else {
+        setError(err.message);
       }
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      loadCoupons();
-    }
-  }, [isLoggedIn]);
+
 
   async function handleCreate(formData) {
     try {

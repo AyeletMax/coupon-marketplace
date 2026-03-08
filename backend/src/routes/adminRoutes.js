@@ -1,17 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const adminController = require('../controllers/adminController');
-const adminAuthMiddleware = require('../middleware/adminAuthMiddleware');
+const adminAuthRoutes = require('./adminAuthRoutes');
+const adminCouponRoutes = require('./adminCouponRoutes');
+const adminResellerRoutes = require('./adminResellerRoutes');
 
-router.post('/login', adminController.adminLogin);
-router.use(adminAuthMiddleware);
-router.post('/logout', adminController.adminLogout);
-router.get('/products', adminController.getAllCoupons);
-router.post('/products', adminController.createCoupon);
-router.get('/products/:id', adminController.getCouponById);
-router.put('/products/:id', adminController.updateCoupon);
-router.delete('/products/:id', adminController.deleteCoupon);
-router.post('/resellers', adminController.createReseller);
-router.get('/resellers', adminController.getAllResellers);
+router.use('/', adminAuthRoutes);
+router.use('/', adminCouponRoutes);
+router.use('/', adminResellerRoutes);
 
 module.exports = router;

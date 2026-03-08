@@ -51,18 +51,27 @@ export async function logout() {
 }
 
 export async function fetchAdminCoupons() {
-  const res = await fetch(`${API_BASE}/products`, {
-    headers: getAuthHeaders(),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    if (res.status === 401) {
-      removeToken();
-      throw new Error('Session expired. Please login again.');
+  try {
+    const res = await fetch(`${API_BASE}/products`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!res.ok) {
+      if (res.status === 401) {
+        removeToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || 'Failed to load coupons');
     }
-    throw new Error(data.message || 'Failed to load coupons');
+    
+    return await res.json();
+  } catch (error) {
+    if (error.message === 'Session expired. Please login again.') {
+      throw error;
+    }
+    throw error;
   }
-  return data;
 }
 
 export async function createCoupon(couponData) {
