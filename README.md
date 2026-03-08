@@ -1,486 +1,183 @@
 # Coupon Marketplace
 
-A digital coupon marketplace with Direct Customer and Reseller API channels.
+A backend system for a digital coupon marketplace supporting direct customer purchases and external reseller integrations via REST API.
 
-## 📋 Overview
+## Overview
 
-This application allows:
-- **Admins** to create and manage digital coupons
-- **Customers** to browse and purchase coupons at fixed prices
-- **Resellers** to purchase coupons via REST API at flexible prices (≥ minimum)
+This application provides:
+- **Admin Panel**: Full CRUD operations for coupon management
+- **Customer Channel**: Browse and purchase coupons at fixed prices
+- **Reseller API**: Authenticated REST API for bulk purchases with flexible pricing
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Backend:** Node.js + Express
-- **Frontend:** React (Vite)
-- **Database:** MySQL 8.0
-- **Deployment:** Docker + Docker Compose
+- **Backend**: Node.js, Express
+- **Frontend**: React (Vite)
+- **Database**: MySQL 8.0
+- **Deployment**: Docker Compose
 
-## 📁 Project Structure
+## Quick Start
 
-```
-coupon-marketplace/
-├── backend/
-│   ├── src/
-│   │   ├── controllers/    # Request handlers
-│   │   ├── services/       # Business logic
-│   │   ├── routes/         # API routes
-│   │   ├── middleware/     # Auth middleware
-│   │   └── db.js          # Database connection
-│   ├── database/
-│   │   ├── schema.sql     # Database schema
-│   │   └── sample-data.sql # Sample coupons
-│   ├── Dockerfile
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── styles/        # CSS files
-│   │   └── api/          # API calls
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── package.json
-├── docker-compose.yml
-├── .env.example
-└── README.md
-```
-
-## 🚀 Quick Start (Docker)
-
-### Prerequisites
-- Docker Desktop installed and running
-- Git
-
-### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
+git clone <repository-url>
 cd coupon-marketplace
-```
-
-### 2. Create .env file
-```bash
 cp env.example .env
-```
-
-### 3. Start all services
-```bash
 docker compose up -d --build
 ```
 
-This will start:
-- **MySQL** on port 3307
-- **Backend** on port 3000
-- **Frontend** on port 80
+**Access the application:**
+- Frontend: http://localhost
+- Backend API: http://localhost:3000
 
-### 4. Access the application
+**Default credentials:**
+- Admin password: `admin123`
 
-Open your browser: **http://localhost**
+**Note on Resellers:** No reseller accounts are pre-created. To test reseller functionality, first login as admin, then create a reseller via `POST /api/admin/resellers`. The response will include a unique Bearer token for API authentication.
 
-The database will be automatically initialized with:
-- **5 sample coupons** (see Sample Data section below)
-- **Default admin user:**
-  - Username: `admin`
-  - Password: `admin123`
-- **No resellers** (you need to create them via Admin panel after login)
+The database initializes automatically with sample data (5 coupons).
 
-### 5. Stop services
-```bash
-docker compose down
+## Architecture
+
+```
+React Frontend
+    ↓
+Express Backend
+    ├── Controllers (HTTP handlers)
+    ├── Services (Business logic)
+    ├── Middleware (Authentication)
+    └── Routes (API endpoints)
+    ↓
+MySQL Database
+    ├── products
+    ├── coupons
+    ├── admins
+    └── resellers
 ```
 
-### 6. Clean everything (including data)
-```bash
-docker compose down -v
+## Authentication
+
+- **Admin**: Password-based login → Bearer token (24h validity)
+- **Reseller**: Bearer token stored in database
+- **Customer**: No authentication required
+
+## Core Features
+
+### Pricing Model
+
+Server-side calculation ensures pricing integrity:
+
+```
+minimum_sell_price = cost_price × (1 + margin_percentage / 100)
 ```
 
----
+**Example**: cost_price = 80, margin = 25% → minimum_sell_price = 100
 
-## 💻 Local Development (without Docker)
+### Admin Operations
 
-### Prerequisites
-- Node.js 18+
-- MySQL 8.0 (or Docker for MySQL only)
+- Create/update/delete coupons
+- Set cost price and margin percentage
+- Manage reseller accounts
+- View all products
 
-### 1. Start MySQL
-```bash
-docker compose up mysql -d
+### Customer Flow
+
+- Browse available coupons
+- Purchase at fixed price (minimum_sell_price)
+- Receive coupon code instantly
+
+### Reseller API
+
+- Token-based authentication
+- Purchase at flexible prices (≥ minimum_sell_price)
+- Atomic transactions with race condition protection
+- Error handling: `PRODUCT_NOT_FOUND` (404), `PRODUCT_ALREADY_SOLD` (409), `RESELLER_PRICE_TOO_LOW` (400), `UNAUTHORIZED` (401)
+
+## API Endpoints
+
+### Admin (`/api/admin`)
+```
+POST   /login              - Authenticate admin
+GET    /products           - List all coupons
+POST   /products           - Create coupon
+PUT    /products/:id       - Update coupon
+DELETE /products/:id       - Delete coupon
+POST   /resellers          - Create reseller
+GET    /resellers          - List resellers
 ```
 
-### 2. Initialize database
-**PowerShell (Windows):**
-```powershell
-Get-Content .\backend\database\schema.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
-Get-Content .\backend\database\sample-data.sql -Raw | docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace
+### Customer (`/api/customer`)
+```
+GET    /coupons            - List available coupons
+POST   /coupons/:id/purchase - Purchase coupon
 ```
 
-**Bash (Linux/Mac):**
-```bash
-docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace < backend/database/schema.sql
-docker exec -i coupon-marketplace-db mysql -u app -papppassword coupon_marketplace < backend/database/sample-data.sql
+### Reseller (`/api/v1`)
+```
+GET    /products           - List available products
+GET    /products/:id       - Get product details
+POST   /products/:id/purchase - Purchase product
 ```
 
-### 3. Start Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-Backend runs on http://localhost:3000
-
-### 4. Start Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Frontend runs on http://localhost:5173
-
----
-
-## 📡 API Documentation
-
-### 🔐 Default Credentials (Development)
+## Example Usage
 
 **Admin Login:**
-- Username: `admin`
-- Password: `admin123`
-
-**Reseller API:**
-- No default reseller tokens are created automatically
-- Admin must create resellers via the Admin panel after logging in
-- Each reseller gets a unique Bearer token upon creation
-
----
-
-### Admin API
-
-Base URL: `/api/admin`
-
-#### Admin Login
-
-```http
-POST /api/admin/login
-Content-Type: application/json
-
-{
-  "password": "admin123"
-}
+```bash
+curl -X POST http://localhost:3000/api/admin/login \
+  -H "Content-Type: application/json" \
+  -d '{"password": "admin123"}'
 ```
 
-Response:
-```json
-{
-  "token": "a1b2c3d4e5f6...",
-  "expires_in": 86400
-}
+**Create Reseller:**
+```bash
+curl -X POST http://localhost:3000/api/admin/resellers \
+  -H "Authorization: Bearer <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Reseller Name"}'
 ```
 
-Security notes:
-- Password is stored as bcrypt hash in the `admins` table
-- A random Bearer token is issued on successful login
-- Token must be sent in `Authorization: Bearer <token>` for all admin endpoints
-- Only one admin session is active at a time (new login revokes previous tokens)
-- Login endpoint is protected with rate limiting (10 attempts per 15 minutes)
-
-#### Create Coupon
-```http
-POST /api/admin/coupons
-Content-Type: application/json
-
-{
-  "name": "Pizza Hut - Large Pizza",
-  "description": "Family pizza + 1.5L drink",
-  "image_url": "https://example.com/pizza.jpg",
-  "cost_price": 50.00,
-  "margin_percentage": 20.00,
-  "value_type": "STRING",
-  "value": "PIZZA-XYZ-12345"
-}
+**Reseller Purchase:**
+```bash
+curl -X POST http://localhost:3000/api/v1/products/<product-id>/purchase \
+  -H "Authorization: Bearer <reseller-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"reseller_price": 150}'
 ```
 
-#### Get All Coupons
-```http
-GET /api/admin/coupons
-```
-
-#### Update Coupon
-```http
-PUT /api/admin/coupons/{id}
-Content-Type: application/json
-
-{
-  "name": "Updated Name",
-  "cost_price": 55.00,
-  ...
-}
-```
-
-#### Delete Coupon
-```http
-DELETE /api/admin/coupons/{id}
-```
-
----
-
-### Customer API
-
-Base URL: `/api/customer`
-
-#### Get Available Coupons
-```http
-GET /api/customer/coupons
-```
-
-Response:
-```json
-[
-  {
-    "id": "uuid",
-    "name": "Pizza Hut - Large Pizza",
-    "description": "Family pizza + 1.5L drink",
-    "image_url": "https://...",
-    "price": 60.00
-  }
-]
-```
-
-#### Purchase Coupon
-```http
-POST /api/customer/coupons/{id}/purchase
-```
-
-Response:
-```json
-{
-  "product_id": "uuid",
-  "final_price": 60.00,
-  "value_type": "STRING",
-  "value": "PIZZA-XYZ-12345"
-}
-```
-
----
-
-### Reseller API
-
-Base URL: `/api/v1`
-
-**Authentication Required:** Bearer Token
-
-**Note:** Reseller tokens are created by Admin via the Admin panel. There are no default reseller tokens.
-
-```http
-Authorization: Bearer <your-reseller-token>
-```
-
-#### Get Available Products
-```http
-GET /api/v1/products
-Authorization: Bearer <your-reseller-token>
-```
-
-#### Get Product by ID
-```http
-GET /api/v1/products/{id}
-Authorization: Bearer <your-reseller-token>
-```
-
-#### Purchase Product
-```http
-POST /api/v1/products/{id}/purchase
-Authorization: Bearer <your-reseller-token>
-Content-Type: application/json
-
-{
-  "reseller_price": 120.00
-}
-```
-
-Response:
-```json
-{
-  "product_id": "uuid",
-  "final_price": 120.00,
-  "value_type": "STRING",
-  "value": "PIZZA-XYZ-12345"
-}
-```
-
-**Error Codes:**
-- `PRODUCT_NOT_FOUND` (404)
-- `PRODUCT_ALREADY_SOLD` (409)
-- `RESELLER_PRICE_TOO_LOW` (400)
-- `UNAUTHORIZED` (401)
-
----
-
-## 🎯 Features
-
-### Admin Mode
-- ✅ Create coupons with cost price and margin
-- ✅ View all coupons
-- ✅ Edit existing coupons
-- ✅ Delete coupons
-- ✅ Automatic price calculation (cost × (1 + margin%))
-
-### Customer Mode
-- ✅ Browse available coupons
-- ✅ Purchase at fixed price (minimum_sell_price)
-- ✅ Receive coupon code after purchase
-- ✅ Real-time inventory updates
-
-### Reseller API
-- ✅ REST API with Bearer token authentication
-- ✅ Purchase at flexible prices (≥ minimum)
-- ✅ Atomic transactions
-- ✅ Comprehensive error handling
-
----
-
-## 🗄️ Database Schema
-
-### products
-```sql
-id              UUID PRIMARY KEY
-name            VARCHAR(255)
-description     TEXT
-type            ENUM('COUPON')
-image_url       VARCHAR(500)
-created_at      TIMESTAMP
-updated_at      TIMESTAMP
-```
-
-### coupons
-```sql
-product_id          UUID PRIMARY KEY (FK → products.id)
-cost_price          DECIMAL(10,2)
-margin_percentage   DECIMAL(5,2)
-minimum_sell_price  DECIMAL(10,2) -- Calculated
-is_sold             BOOLEAN
-value_type          ENUM('STRING', 'IMAGE')
-value               TEXT -- Coupon code (revealed after purchase)
-```
-
----
-
-## 🔒 Environment Variables
-
-Create a `.env` file in the project root:
+## Environment Variables
 
 ```env
-# MySQL
 MYSQL_ROOT_PASSWORD=rootpassword
 MYSQL_DATABASE=coupon_marketplace
 MYSQL_USER=app
 MYSQL_PASSWORD=apppassword
 MYSQL_PORT=3307
-
-# Backend Port
 PORT=3000
 ```
 
-**⚠️ Never commit `.env` to Git!**
+**Note**: Admin and reseller credentials are stored in the database with bcrypt hashing.
 
-**Note:** Admin and Reseller credentials are stored in the database, not in environment variables.
-
----
-
-## 🧪 Testing the API
-
-### Admin Login
-
-**Login as admin:**
-```bash
-curl -X POST \
-     -H "Content-Type: application/json" \
-     -d '{"password": "admin123"}' \
-     http://localhost:3000/api/admin/login
-```
-
-Response will include a token. Use it for subsequent admin requests.
-
-### Reseller API
-
-**Note:** First create a reseller via Admin panel to get a token.
-
-**Get available products:**
-```bash
-curl -H "Authorization: Bearer <your-reseller-token>" \
-     http://localhost:3000/api/v1/products
-```
-
-**Purchase as Reseller:**
-```bash
-curl -X POST \
-     -H "Authorization: Bearer <your-reseller-token>" \
-     -H "Content-Type: application/json" \
-     -d '{"reseller_price": 120.00}' \
-     http://localhost:3000/api/v1/products/{product-id}/purchase
-```
-
----
-
-## 📦 Sample Data
-
-The database includes 5 sample coupons:
-- 🍕 Pizza Hut - ₪60
-- 💆 Spa Treatment - ₪230
-- 🎬 Cinema City - ₪100
-- 🍽️ Fine Dining - ₪390
-- 💪 Gym Membership - ₪480
-
----
-
-## 🏗️ Architecture
+## Project Structure
 
 ```
-Frontend (React)
-    ↓ HTTP
-Backend (Express)
-    ↓ SQL
-MySQL Database
+coupon-marketplace/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   └── db.js
+│   ├── database/
+│   │   ├── schema.sql
+│   │   └── sample-data.sql
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   └── Dockerfile
+└── docker-compose.yml
 ```
 
-**Backend Layers:**
-- **Routes** → Define endpoints
-- **Controllers** → Handle requests/responses
-- **Services** → Business logic
-- **Database** → Data persistence
 
----
+## Author
 
-## 🐛 Troubleshooting
-
-### Port already in use
-```bash
-# Change ports in .env
-MYSQL_PORT=3308
-PORT=3001
-```
-
-### Database connection failed
-```bash
-# Check MySQL is running
-docker ps
-
-# Check logs
-docker logs coupon-marketplace-db
-```
-
-### Frontend can't connect to backend
-```bash
-# Check backend is running
-curl http://localhost:3000/health
-```
-
----
-
-## 📝 License
-
-MIT
-
----
-
-## 👤 Author
-
-Your Name
+Ayelet Maximove
