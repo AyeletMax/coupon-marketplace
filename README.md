@@ -4,99 +4,69 @@ A backend system for a digital coupon marketplace supporting direct customer pur
 
 ## Overview
 
-This application provides:
 - **Admin Panel**: Full CRUD operations for coupon management
 - **Customer Channel**: Browse and purchase coupons at fixed prices
 - **Reseller API**: Authenticated REST API for bulk purchases with flexible pricing
 
 ## Tech Stack
 
-- **Backend**: Node.js, Express
-- **Frontend**: React (Vite)
-- **Database**: MySQL 8.0
-- **Deployment**: Docker Compose
+Node.js + Express | React (Vite) | MySQL 8.0 | Docker Compose
 
 ## Quick Start
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ayelet-maximove/coupon-marketplace
 cd coupon-marketplace
 cp env.example .env
 docker compose up -d --build
 ```
 
-**Access the application:**
-- Frontend: http://localhost
-- Backend API: http://localhost:3000
+**Access:** http://localhost
 
-**Default credentials:**
-- Admin password: `admin123`
+**Default Admin Password:** `admin123`
 
-**Note on Resellers:** No reseller accounts are pre-created. To test reseller functionality, first login as admin, then create a reseller via `POST /api/admin/resellers`. The response will include a unique Bearer token for API authentication.
+The database auto-initializes with 5 sample coupons and an admin account.
 
-The database initializes automatically with sample data (5 coupons).
+**Note:** No reseller accounts are pre-created. Login as admin and create one via `POST /api/admin/resellers` to receive a Bearer token.
 
 ## Architecture
 
 ```
-React Frontend
+React Frontend (Port 80)
     ↓
-Express Backend
-    ├── Controllers (HTTP handlers)
-    ├── Services (Business logic)
-    ├── Middleware (Authentication)
-    └── Routes (API endpoints)
+Express Backend (Port 3000)
+    ├── Controllers
+    ├── Services
+    ├── Middleware
+    └── Routes
     ↓
-MySQL Database
-    ├── products
-    ├── coupons
-    ├── admins
-    └── resellers
+MySQL Database (Port 3307)
 ```
 
 ## Authentication
 
-- **Admin**: Password-based login → Bearer token (24h validity)
-- **Reseller**: Bearer token stored in database
+- **Admin**: Password login → Bearer token (24h validity)
+- **Reseller**: Bearer token (permanent, stored in DB)
 - **Customer**: No authentication required
 
-## Core Features
-
-### Pricing Model
-
-Server-side calculation ensures pricing integrity:
+## Pricing Model
 
 ```
 minimum_sell_price = cost_price × (1 + margin_percentage / 100)
 ```
 
-**Example**: cost_price = 80, margin = 25% → minimum_sell_price = 100
+**Example:** cost_price = 80, margin = 25% → minimum_sell_price = 100
 
-### Admin Operations
-
-- Create/update/delete coupons
-- Set cost price and margin percentage
-- Manage reseller accounts
-- View all products
-
-### Customer Flow
-
-- Browse available coupons
-- Purchase at fixed price (minimum_sell_price)
-- Receive coupon code instantly
-
-### Reseller API
-
-- Token-based authentication
-- Purchase at flexible prices (≥ minimum_sell_price)
-- Atomic transactions with race condition protection
-- Error handling: `PRODUCT_NOT_FOUND` (404), `PRODUCT_ALREADY_SOLD` (409), `RESELLER_PRICE_TOO_LOW` (400), `UNAUTHORIZED` (401)
+**Rules:**
+- Customers pay exactly `minimum_sell_price`
+- Resellers must pay ≥ `minimum_sell_price`
+- Server-side calculation only
 
 ## API Endpoints
 
 ### Admin (`/api/admin`)
 ```
-POST   /login              - Authenticate admin
+POST   /login              - Admin authentication
 GET    /products           - List all coupons
 POST   /products           - Create coupon
 PUT    /products/:id       - Update coupon
@@ -112,6 +82,7 @@ POST   /coupons/:id/purchase - Purchase coupon
 ```
 
 ### Reseller (`/api/v1`)
+**Requires:** `Authorization: Bearer <token>`
 ```
 GET    /products           - List available products
 GET    /products/:id       - Get product details
@@ -120,28 +91,59 @@ POST   /products/:id/purchase - Purchase product
 
 ## Example Usage
 
-**Admin Login:**
+**1. Admin Login:**
 ```bash
 curl -X POST http://localhost:3000/api/admin/login \
   -H "Content-Type: application/json" \
   -d '{"password": "admin123"}'
 ```
 
-**Create Reseller:**
+**2. Create Reseller:**
 ```bash
 curl -X POST http://localhost:3000/api/admin/resellers \
   -H "Authorization: Bearer <admin-token>" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Reseller Name"}'
+  -d '{"name": "My Reseller"}'
 ```
+Response includes unique Bearer token.
 
-**Reseller Purchase:**
+**3. Reseller Purchase:**
 ```bash
 curl -X POST http://localhost:3000/api/v1/products/<product-id>/purchase \
   -H "Authorization: Bearer <reseller-token>" \
   -H "Content-Type: application/json" \
   -d '{"reseller_price": 150}'
 ```
+
+**4. Customer Purchase:**
+```bash
+curl -X POST http://localhost:3000/api/customer/coupons/<product-id>/purchase
+```
+
+## Key Features
+
+**Admin:**
+- Create/update/delete coupons with cost price and margin
+- Manage reseller accounts
+- Rate limiting on login (10 attempts/15 min)
+
+**Customer:**
+- Browse available coupons
+- Purchase at fixed price
+- Instant coupon code delivery
+
+**Reseller:**
+- Token-based authentication
+- Flexible pricing (≥ minimum)
+- Atomic transactions with race condition protection
+- Error codes: `401 UNAUTHORIZED`, `404 PRODUCT_NOT_FOUND`, `409 PRODUCT_ALREADY_SOLD`, `400 RESELLER_PRICE_TOO_LOW`
+
+## Database Schema
+
+**products:** id (UUID), name, description, type, image_url, timestamps  
+**coupons:** product_id (FK), cost_price, margin_percentage, minimum_sell_price (generated), is_sold, value_type, value  
+**admins:** id, username, password_hash (bcrypt), timestamps  
+**resellers:** id, name, token_hash (bcrypt), token_prefix, timestamps
 
 ## Environment Variables
 
@@ -154,7 +156,7 @@ MYSQL_PORT=3307
 PORT=3000
 ```
 
-**Note**: Admin and reseller credentials are stored in the database with bcrypt hashing.
+**Security:** Admin and reseller credentials stored in database with bcrypt hashing, not in environment variables.
 
 ## Project Structure
 
@@ -177,6 +179,15 @@ coupon-marketplace/
 └── docker-compose.yml
 ```
 
+## Troubleshooting
+
+**Port in use:** Change `PORT` in `.env`  
+**Database error:** `docker logs coupon-marketplace-db`  
+**Clean restart:** `docker compose down -v && docker compose up -d --build`
+
+## License
+
+MIT
 
 ## Author
 
