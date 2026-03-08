@@ -11,5 +11,7 @@ router.post('/products', adminController.createCoupon);
 router.get('/products/:id', adminController.getCouponById);
 router.put('/products/:id', adminController.updateCoupon);
 router.delete('/products/:id', adminController.deleteCoupon);
+router.post('/resellers', adminController.createReseller);
+router.get('/resellers', adminController.getAllResellers);
 
 module.exports = router;

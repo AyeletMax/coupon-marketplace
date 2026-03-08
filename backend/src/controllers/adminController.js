@@ -1,4 +1,5 @@
 const couponService = require('../services/couponService');
+const resellerManagementService = require('../services/resellerManagementService');
 const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
@@ -227,6 +228,49 @@ async function deleteCoupon(req, res) {
   }
 }
 
+async function createReseller(req, res) {
+  try {
+    const { name } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ 
+        error_code: 'MISSING_NAME', 
+        message: 'Reseller name is required' 
+      });
+    }
+    
+    const sanitizedName = validator.escape(name.trim());
+    const reseller = await resellerManagementService.createReseller(sanitizedName);
+    
+    res.status(201).json(reseller);
+  } catch (error) {
+    if (error.code === 'DUPLICATE_NAME') {
+      return res.status(409).json({ 
+        error_code: 'DUPLICATE_NAME', 
+        message: 'Reseller name already exists' 
+      });
+    }
+    console.error('Create reseller error:', error);
+    res.status(500).json({ 
+      error_code: 'SERVER_ERROR', 
+      message: 'Failed to create reseller' 
+    });
+  }
+}
+
+async function getAllResellers(req, res) {
+  try {
+    const resellers = await resellerManagementService.getAllResellers();
+    res.json(resellers);
+  } catch (error) {
+    console.error('Get resellers error:', error);
+    res.status(500).json({ 
+      error_code: 'SERVER_ERROR', 
+      message: 'Failed to retrieve resellers' 
+    });
+  }
+}
+
 module.exports = {
   adminLogin,
   adminLogout,
@@ -235,5 +279,7 @@ module.exports = {
   getCouponById,
   updateCoupon,
   deleteCoupon,
+  createReseller,
+  getAllResellers,
   isValidToken,
 };
