@@ -21,8 +21,8 @@ async function createCoupon(data) {
     );
     
     await connection.query(
-      'INSERT INTO coupons (product_id, cost_price, margin_percentage, minimum_sell_price, value_type, value) VALUES (?, ?, ?, ?, ?, ?)',
-      [productId, data.cost_price, data.margin_percentage, minimumSellPrice, data.value_type, data.value]
+      'INSERT INTO coupons (product_id, cost_price, margin_percentage, value_type, value) VALUES (?, ?, ?, ?, ?)',
+      [productId, data.cost_price, data.margin_percentage, data.value_type, data.value]
     );
     
     await connection.commit();
@@ -73,8 +73,8 @@ async function updateCoupon(id, data) {
     const minimumSellPrice = calculateMinimumSellPrice(data.cost_price, data.margin_percentage);
     
     await connection.query(
-      'UPDATE coupons SET cost_price = ?, margin_percentage = ?, minimum_sell_price = ?, value_type = ?, value = ? WHERE product_id = ?',
-      [data.cost_price, data.margin_percentage, minimumSellPrice, data.value_type, data.value, id]
+      'UPDATE coupons SET cost_price = ?, margin_percentage = ?, value_type = ?, value = ? WHERE product_id = ?',
+      [data.cost_price, data.margin_percentage, data.value_type, data.value, id]
     );
     
     await connection.commit();

@@ -5,7 +5,14 @@ async function getAvailableCoupons(req, res) {
     const coupons = await customerService.getAvailableCouponsForCustomer();
     res.json(coupons);
   } catch (error) {
-    res.status(500).json({ error_code: 'SERVER_ERROR', message: error.message });
+    console.error('Error in getAvailableCoupons:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    res.status(500).json({ 
+      error_code: 'SERVER_ERROR', 
+      message: error.message || error.toString() || 'Unknown error',
+      details: error.code || error.errno || 'No additional details'
+    });
   }
 }
 
@@ -27,10 +34,10 @@ async function purchaseCoupon(req, res) {
         .json({ error_code: 'PRODUCT_ALREADY_SOLD', message: 'Product already sold' });
     }
 
-    // Success – return coupon value and final price (minimum_sell_price)
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error_code: 'SERVER_ERROR', message: error.message });
+    console.error('Error in purchaseCoupon:', error);
+    res.status(500).json({ error_code: 'SERVER_ERROR', message: error.message || 'Unknown error' });
   }
 }
 

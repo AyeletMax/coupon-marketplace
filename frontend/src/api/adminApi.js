@@ -1,6 +1,5 @@
 const API_BASE = '/api/admin';
 
-// Token management
 function getToken() {
   return localStorage.getItem('adminToken');
 }
@@ -18,7 +17,7 @@ function getAuthHeaders() {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
-// Admin login
+
 export async function adminLogin(password) {
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',
@@ -32,12 +31,10 @@ export async function adminLogin(password) {
   return data;
 }
 
-// Check if user is authenticated
 export function isAuthenticated() {
   return !!getToken();
 }
 
-// Logout
 export async function logout() {
   const token = getToken();
   if (token) {
@@ -54,7 +51,7 @@ export async function logout() {
 }
 
 export async function fetchAdminCoupons() {
-  const res = await fetch(`${API_BASE}/coupons`, {
+  const res = await fetch(`${API_BASE}/products`, {
     headers: getAuthHeaders(),
   });
   const data = await res.json().catch(() => ({}));
@@ -69,7 +66,7 @@ export async function fetchAdminCoupons() {
 }
 
 export async function createCoupon(couponData) {
-  const res = await fetch(`${API_BASE}/coupons`, {
+  const res = await fetch(`${API_BASE}/products`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -89,7 +86,7 @@ export async function createCoupon(couponData) {
 }
 
 export async function updateCoupon(id, couponData) {
-  const res = await fetch(`${API_BASE}/coupons/${id}`, {
+  const res = await fetch(`${API_BASE}/products/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -109,7 +106,7 @@ export async function updateCoupon(id, couponData) {
 }
 
 export async function deleteCoupon(id) {
-  const res = await fetch(`${API_BASE}/coupons/${id}`, {
+  const res = await fetch(`${API_BASE}/products/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

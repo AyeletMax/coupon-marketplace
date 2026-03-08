@@ -1,14 +1,6 @@
-/**
- * Customer service – direct coupon purchases by end-customers (not resellers).
- * The customer always pays minimum_sell_price, never sends a custom price.
- */
-
 const { getPool } = require('../db');
 
-/**
- * Returns all coupons that are not sold yet,
- * with price = minimum_sell_price (for frontend display).
- */
+
 async function getAvailableCouponsForCustomer() {
   const pool = await getPool();
   const [rows] = await pool.query(
@@ -24,14 +16,6 @@ async function getAvailableCouponsForCustomer() {
   return rows;
 }
 
-/**
- * Direct coupon purchase by customer:
- * - Validates that product exists and is not sold
- * - Uses price = minimum_sell_price (not provided by the customer)
- * - Marks coupon as sold
- * - Returns the value (coupon code)
- * All inside a transaction to avoid race conditions.
- */
 async function purchaseCouponAsCustomer(productId) {
   const pool = await getPool();
   const connection = await pool.getConnection();

@@ -1,7 +1,3 @@
-/**
- * MySQL connection – uses .env in the project root
- */
-
 const mysql = require('mysql2/promise');
 
 const dbConfig = {
@@ -24,7 +20,6 @@ async function getPool() {
   return pool;
 }
 
-/** Check DB connectivity (used for /health) */
 async function checkConnection() {
   const p = await getPool();
   const [rows] = await p.query('SELECT 1 AS ok');

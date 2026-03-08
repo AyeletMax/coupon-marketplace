@@ -1,7 +1,3 @@
-/**
- * Coupon Marketplace - Backend entry point
- */
-
 const path = require('path');
 const fs = require('fs');
 const envInCwd = path.resolve(process.cwd(), '.env');
@@ -9,14 +5,11 @@ const envInParent = path.resolve(process.cwd(), '..', '.env');
 const envPath = fs.existsSync(envInCwd) ? envInCwd : envInParent;
 require('dotenv').config({ path: envPath });
 
-// Environment validation
 const requiredEnvVars = [
   'MYSQL_HOST',
   'MYSQL_DATABASE',
   'MYSQL_USER',
   'MYSQL_PASSWORD',
-  'RESELLER_TOKEN',
-  'ADMIN_PASSWORD_HASH',
 ];
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -40,7 +33,7 @@ const customerRoutes = require('./routes/customerRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Global rate limiting (all routes)
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -52,7 +45,6 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Stricter rate limiting for admin login to mitigate brute-force
 const adminLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -67,13 +59,10 @@ const adminLoginLimiter = rateLimit({
 app.use(limiter);
 app.use(express.json());
 
-// Apply stricter limiter only on the admin login endpoint
 app.use('/api/admin/login', adminLoginLimiter);
-
 app.use('/api/admin', adminRoutes);
 app.use('/api/v1', resellerRoutes);
 app.use('/api/customer', customerRoutes);
-
 app.get('/health', async (req, res) => {
   try {
     const dbOk = await checkConnection();

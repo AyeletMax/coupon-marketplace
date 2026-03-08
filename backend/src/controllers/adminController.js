@@ -2,19 +2,16 @@ const couponService = require('../services/couponService');
 const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const { getPool } = require('../db');
+h
+const activeTokens = new Map(); 
 
-// Admin password hash – loaded from environment variable for flexibility and security
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 
-// In-memory active admin tokens (for production use Redis or a database)
-const activeTokens = new Map(); // Map<token, { createdAt, expiresAt }>
-
-// Generate a random token
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// Remove expired tokens
+
 function cleanExpiredTokens() {
   const now = Date.now();
   for (const [token, data] of activeTokens.entries()) {
@@ -24,13 +21,20 @@ function cleanExpiredTokens() {
   }
 }
 
-// Check if token is still valid
+
 function isValidToken(token) {
   cleanExpiredTokens();
   return activeTokens.has(token);
 }
 
-// Admin login
+async function getDefaultAdmin() {
+  const pool = await getPool();
+  const [rows] = await pool.query(
+    'SELECT id, username, password_hash FROM admins ORDER BY id ASC LIMIT 1'
+  );
+  return rows[0] || null;
+}
+
 async function adminLogin(req, res) {
   try {
     const { password } = req.body;
@@ -42,15 +46,16 @@ async function adminLogin(req, res) {
       });
     }
     
-    if (!ADMIN_PASSWORD_HASH) {
+    const admin = await getDefaultAdmin();
+
+    if (!admin || !admin.password_hash) {
       return res.status(500).json({
         error_code: 'SERVER_ERROR',
         message: 'Admin authentication is not properly configured',
       });
     }
     
-    // Compare password with hash
-    const isValidPassword = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    const isValidPassword = await bcrypt.compare(password, admin.password_hash);
     
     if (!isValidPassword) {
       return res.status(401).json({ 
@@ -59,14 +64,12 @@ async function adminLogin(req, res) {
       });
     }
     
-    // Revoke all previous tokens – only one active admin session at a time
     cleanExpiredTokens();
     activeTokens.clear();
     
-    // Generate a new token
     const token = generateToken();
     const now = Date.now();
-    const expiresIn = 24 * 60 * 60 * 1000; // 24 hours
+    const expiresIn = 24 * 60 * 60 * 1000;
     
     activeTokens.set(token, {
       createdAt: now,
@@ -75,7 +78,7 @@ async function adminLogin(req, res) {
     
     res.json({ 
       token,
-      expires_in: 86400 // 24 hours in seconds
+      expires_in: 86400 
     });
   } catch (error) {
     console.error('Admin login error:', error);
@@ -86,7 +89,7 @@ async function adminLogin(req, res) {
   }
 }
 
-// Admin logout
+
 function adminLogout(req, res) {
   try {
     const authHeader = req.headers.authorization;
