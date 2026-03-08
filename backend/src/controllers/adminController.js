@@ -3,7 +3,7 @@ const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const { getPool } = require('../db');
-h
+
 const activeTokens = new Map(); 
 
 
