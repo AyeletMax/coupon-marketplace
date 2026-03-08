@@ -49,8 +49,10 @@ CREATE TABLE resellers (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(255) NOT NULL,
     token_hash      VARCHAR(255) NOT NULL COMMENT 'bcrypt hash of the reseller Bearer token',
+    token_prefix    VARCHAR(8) NOT NULL COMMENT 'First 8 chars of token for indexed lookup',
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    UNIQUE KEY uq_reseller_name (name)
+    UNIQUE KEY uq_reseller_name (name),
+    INDEX idx_token_prefix (token_prefix)
 );

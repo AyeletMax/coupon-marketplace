@@ -12,11 +12,21 @@ async function authMiddleware(req, res, next) {
   }
   
   const token = authHeader.substring(7);
+  
+  if (token.length < 8) {
+    return res.status(401).json({ 
+      error_code: 'UNAUTHORIZED', 
+      message: 'Invalid token' 
+    });
+  }
 
   try {
     const pool = await getPool();
+    const tokenPrefix = token.substring(0, 8);
+    
     const [rows] = await pool.query(
-      'SELECT id, name, token_hash FROM resellers'
+      'SELECT id, name, token_hash FROM resellers WHERE token_prefix = ?',
+      [tokenPrefix]
     );
 
     let matchedReseller = null;

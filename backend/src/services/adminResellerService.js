@@ -22,10 +22,11 @@ async function createReseller(name) {
   
   const token = generateToken();
   const tokenHash = await bcrypt.hash(token, 12);
+  const tokenPrefix = token.substring(0, 8);
   
   const [result] = await pool.query(
-    'INSERT INTO resellers (name, token_hash) VALUES (?, ?)',
-    [name, tokenHash]
+    'INSERT INTO resellers (name, token_hash, token_prefix) VALUES (?, ?, ?)',
+    [name, tokenHash, tokenPrefix]
   );
   
   return {
